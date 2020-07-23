@@ -5,6 +5,7 @@
 
 #include <bits/stdc++.h>
 using namespace std;
+// #define MYCOMP 1
 #ifdef MYCOMP
 class pscr {
    public:
@@ -50,36 +51,39 @@ class pscr {
 };
 #endif
 #define debug(...) "[[" << #__VA_ARGS__ << ": " << __VA_ARGS__ << "]]\t\t"
-#define vctr vector<unsigned int>
-#define mp map<string, int>
+#define vctr vector<long long>
+#define mp map<string, long long>
 #define mp1 map<string, vctr>
 
 int main() {
-    int N, R;
+    long long N, R;
     cin >> N >> R;
-    vector<string> arrays(N);
+    set<string> arrays;
     map<string, pair<mp, mp1>> ass;
     vector<pair<string, vctr>> queries;
-    for (int i = 0; i < N; i++) {
-        cin >> arrays[i];
-        unsigned int B, CD, D;
-        cin >> B >> CD >> D;
-        vctr ld(D), ud(D);
-        for (int j = 0; j < D; j++) cin >> ld[j] >> ud[j];
-        mp temp1 = {{"B", B}, {"CD", CD}, {"D", D}};
-        mp1 temp2 = {{"ld", ld}, {"ud", ud}};
-        ass[arrays[i]] = make_pair(temp1, temp2);
-    }
-    for (int i = 0; i < R; i++) {
+    for (long long i = 0; i < N; i++) {
         string nm;
         cin >> nm;
-        int dim = ass[nm].first["D"];
+        arrays.insert(nm);
+        long long B, CD, D;
+        cin >> B >> CD >> D;
+        vctr ld(D), ud(D);
+        for (long long j = 0; j < D; j++) cin >> ld[j] >> ud[j];
+        mp temp1 = {{"B", B}, {"CD", CD}, {"D", D}};
+        mp1 temp2 = {{"ld", ld}, {"ud", ud}};
+        ass[nm] = make_pair(temp1, temp2);
+    }
+    for (long long i = 0; i < R; i++) {
+        string nm;
+        cin >> nm;
+        if (arrays.find(nm) == arrays.end()) continue;
+        long long dim = ass[nm].first["D"];
         vctr temp(dim);
-        for (int j = 0; j < dim; j++) cin >> temp[j];
+        for (long long j = 0; j < dim; j++) cin >> temp[j];
         long prev = ass[nm].first["CD"];
         long addr = (1L) * prev * temp[dim - 1],
              sum = (1L) * prev * ass[nm].second["ld"][dim - 1];
-        for (int j = dim - 2; j >= 0; j--) {
+        for (long long j = dim - 2; j >= 0; j--) {
             long cd =
                 (1L) * prev *
                 (ass[nm].second["ud"][j + 1] - ass[nm].second["ld"][j + 1] + 1);
