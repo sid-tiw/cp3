@@ -5,40 +5,50 @@
 
 using namespace std;
 
-vector<int> min_dp(int m, int n, vector<int> arr, int k) {
-    int mid = (m + n) / 2;
-    vector<int> orgi(n - m + 1, 0), tcost(n - m + 1, 0);
-    if (mid + 1 <= n) {
-        vector<int> cost1 = min_dp(mid + 1, n, arr, k);
-        for (int i = mid + 1; i <= n; i++) {
-            if (arr[i] < arr[mid] || cost1[i - mid - 1] == 1)
-                orgi[i - m] = 1;
-            if (cost1[i - mid - 1] == 1) 
-                tcost[i - m] = 1;
+int min_dp(vector<int> arr, int m) {  // Not working
+    int n = arr.size();
+    vector<bool> temp;
+    temp.push_back(false);
+    for (int i = n - 2; i >= 0; i--) {
+        int ti = i, count = 0;
+        for (int j = i - 1; j >= 0 && arr[i] == arr[j]; j--) count++;
+        ti -= count;
+        int if_not_moved = 0, if_moved = count + 1;
+        int t_size = temp.size();
+        for (int j = 0; j < t_size; j++) {
+            if (arr[j + i + 1] < arr[i] || temp[t_size - j - 1]) if_not_moved++;
+            if (temp[t_size - j - 1]) if_moved++;
         }
-        for (int i = 0; i < k; i++) orgi[i] += cost1[i];
-    }
-    if (mid - 1 >= m) {
-        vector<int> cost2 = min_dp(m, mid - 1, arr, k);
-        for (int i = 0; i < mid; i++) {
-            if (arr[i] > arr[mid]) {
-                orgi[arr[i] - 1]++;
-                if (cost2[arr[i] - 1] > 0) {
-                    cost2[arr[i] - 1]--;
-                    tcost[arr[i] - 1]++;
-                }
-            }
+        if (if_moved < if_not_moved)
+            for (int j = 0; j <= count; j++) temp.push_back(true);
+        if (if_moved >= if_not_moved) {
+            for (int j = 0; j <= count; j++) temp.push_back(false);
+            for (int j = 0; j < temp.size(); j++)
+                if (arr[j + i] < arr[i]) temp[j] = true;
         }
-        for (int i = 0; i < k; i++) orgi[i] += cost2[i];
+        i = ti;
     }
-    tcost[arr[mid] - 1]++;
-    int sum1 = 0, sum2 = 0;
-    for (auto it : tcost) sum1 += it;
-    for (auto it : orgi) sum2 += it;
-    if (sum1 < sum2)
-        return tcost;
-    else
-        return orgi;
+    int count = 0;
+    for (auto it : temp)
+        if (it) count++;
+    return count;
+}
+
+int alternative(vector<int> arr, int m) {   // working function
+    vector<int> temp;
+    temp.push_back(1);
+    for (int i = 1; i < arr.size(); i++) {
+        int mx = 0;
+        for (int j = 0; j < i; j++) {
+            if (arr[i] < arr[j]) continue;
+            mx = max(temp[j], mx);
+        }
+        mx++;
+        temp.push_back(mx);
+    }
+    int max_ans = temp[0];
+    for (auto it : temp) max_ans = max(max_ans, it);
+    return arr.size() - max_ans;
 }
 
 int main() {
@@ -54,9 +64,6 @@ int main() {
         cin >> tt >> dd;
         arr.push_back(tt);
     }
-    vector<int> temp = min_dp(0, n - 1, arr, m);
-    int ans = 0;
-    for (auto it : temp) ans += it;
-    cout << ans << "\n";
+    cout << alternative(arr, m) << "\n";
     return 0;
 }
